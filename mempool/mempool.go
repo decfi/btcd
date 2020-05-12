@@ -111,7 +111,7 @@ type Policy struct {
 	// MaxTxVersion is the transaction version that the mempool should
 	// accept.  All transactions above this version are rejected as
 	// non-standard.
-	MaxTxVersion int32
+	MaxTxVersion int16
 
 	// DisableRelayPriority defines whether to relay free or low-fee
 	// transactions that do not have enough priority to be relayed.
