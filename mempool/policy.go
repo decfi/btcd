@@ -277,7 +277,7 @@ func isDust(txOut *wire.TxOut, minRelayTxFee btcutil.Amount) bool {
 // so small it costs more to process them than they are worth).
 func checkTransactionStandard(tx *btcutil.Tx, height int32,
 	medianTimePast time.Time, minRelayTxFee btcutil.Amount,
-	maxTxVersion int32) error {
+	maxTxVersion int16) error {
 
 	// The transaction must be a currently supported version.
 	msgTx := tx.MsgTx()
