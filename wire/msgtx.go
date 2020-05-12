@@ -409,11 +409,18 @@ func (msg *MsgTx) Copy() *MsgTx {
 // See Deserialize for decoding transactions stored to disk, such as in a
 // database, as opposed to decoding transactions from the wire.
 func (msg *MsgTx) BtcDecode(r io.Reader, pver uint32, enc MessageEncoding) error {
-	version, err := binarySerializer.Uint32(r, littleEndian)
+	version, err := binarySerializer.Uint16(r, littleEndian)
 	if err != nil {
 		return err
 	}
 	msg.Version = int32(version)
+
+	txType, err := binarySerializer.Uint16(r, littleEndian)
+	if err != nil {
+		return err
+	}
+	// todo: add msg.Type
+	//msg.Type = int16(txType)
 
 	count, err := ReadVarInt(r, pver)
 	if err != nil {
@@ -423,7 +430,7 @@ func (msg *MsgTx) BtcDecode(r io.Reader, pver uint32, enc MessageEncoding) error
 	// A count of zero (meaning no TxIn's to the uninitiated) indicates
 	// this is a transaction with witness data.
 	var flag [1]byte
-	if count == 0 && enc == WitnessEncoding {
+	if count == 0 && enc == WitnessEncoding && !(version >= 3 && txType == 6) {
 		// Next, we need to read the flag, which is a single byte.
 		if _, err = io.ReadFull(r, flag[:]); err != nil {
 			return err
@@ -535,7 +542,7 @@ func (msg *MsgTx) BtcDecode(r io.Reader, pver uint32, enc MessageEncoding) error
 
 	// If the transaction's flag byte isn't 0x00 at this point, then one or
 	// more of its inputs has accompanying witness data.
-	if flag[0] != 0 && enc == WitnessEncoding {
+	if flag[0] != 0 && enc == WitnessEncoding && !(version >= 3 && txType == 6) {
 		for _, txin := range msg.TxIn {
 			// For each input, the witness is encoded as a stack
 			// with one or more items. Therefore, we first read a
