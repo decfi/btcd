@@ -585,6 +585,18 @@ func (msg *MsgTx) BtcDecode(r io.Reader, pver uint32, enc MessageEncoding) error
 		return err
 	}
 
+	if version >= 3 && txType != 0 {
+		// todo: save extraPayloadSize in transaction structure
+		extraPayloadSize, err := ReadVarInt(r, pver)
+		if err != nil {
+			return err
+		}
+
+		payload := make([]byte, extraPayloadSize)
+		// todo: save payload in transaction structure
+		_, err = io.ReadFull(r, payload)
+	}
+
 	// Create a single allocation to house all of the scripts and set each
 	// input signature script and output public key script to the
 	// appropriate subslice of the overall contiguous buffer.  Then, return
